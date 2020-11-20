@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from sklearn.metrics import accuracy_score, f1_score, precision_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 
 class ProteinInteraction(nn.Module):
