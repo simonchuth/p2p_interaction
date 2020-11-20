@@ -51,8 +51,8 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
 
     train_loss_list = []
     train_acc_list = []
-    val_loss_list = []
-    val_acc_list = []
+    test_loss_list = []
+    test_acc_list = []
 
     for epoch in range(num_epoch):
         print(f'Epoch {epoch + 1}')
