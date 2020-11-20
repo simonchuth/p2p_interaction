@@ -11,7 +11,16 @@ from src.utils import pickle_load, json_load, chunk_list, str2bool
 from src.preprocess import preprocess_batch
 from src.model import ProteinInteraction
 
-def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=2046, num_epoch=10, subset_data=1, use_cuda=False):
+def main(datapath,
+         random_seed=1,
+         test_fraction=0.1,
+         batch_size=100,
+         max_len=2046,
+         num_epoch=10,
+         subset_data=1,
+         use_cuda=False,
+         es_patience=3):
+
     dataset_nip = pickle_load(join(datapath, 'dataset_nip.pkl'))
     dataset_ip = pickle_load(join(datapath, 'dataset_ip.pkl'))
     seq_dict = json_load(join(datapath, 'seq_dict.json'))
@@ -53,6 +62,9 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
     train_acc_list = []
     test_loss_list = []
     test_acc_list = []
+
+    best_loss = 1000
+    es_counter = 0
 
     for epoch in range(num_epoch):
         print(f'Epoch {epoch + 1}')
@@ -105,6 +117,25 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
 
         print(f'Epoch {epoch + 1} - Testing: {int(time.time() - test_start_time)} sec')
         print(f'Test Loss: {test_loss} ... Test Accuracy: {test_acc}')
+
+        if test_loss < best_loss:
+            torch.save(model, 'best_model.pt')
+            es_counter = 0
+        else:
+            print('Loss not decreasing')
+            es_counter += 1
+
+        pickle_save(train_loss_list, 'train_loss.pkl')
+        pickle_save(train_acc_list, 'train_acc.pkl')
+        pickle_save(test_loss_list, 'test_loss.pkl')
+        pickle_save(test_acc_list, 'test_acc.pkl')
+
+        if es_counter > es_patience:
+            break
+
+    torch.save(model, 'final_model.pt')
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

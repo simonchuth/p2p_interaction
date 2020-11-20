@@ -7,15 +7,22 @@ def pickle_load(pkl_path):
     return obj
 
 
+def pickle_save(obj, pkl_path):
+    with open(pkl_path, 'wb') as pkl_file:
+        pickle.dump(obj, pkl_file)
+
+
 def json_load(json_path):
     with open(json_path, 'r') as json_file:
         obj = json.load(json_file)
     return obj
 
+
 def chunk_list(input_list, batch_size):
     chunklist = [input_list[x:x + batch_size] for
                 x in range(0, len(input_list), batch_size)]
     return chunklist
+
 
 def str2bool(var):
     if isinstance(var, bool):
