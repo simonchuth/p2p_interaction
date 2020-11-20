@@ -39,6 +39,18 @@ def main(data_path,
     train = train_nip + train_ip
     test = test_nip + test_ip
 
+    train_inverse = []
+    for pair_data in train:
+        protein_a, protein_b, interaction = pair_data
+        train_inverse.append([protein_b, protein_a, interaction])
+    train += train_inverse
+
+    test_inverse = []
+    for pair_data in test:
+        protein_a, protein_b, interaction = pair_data
+        test_inverse.append([protein_b, protein_a, interaction])
+    test += test_inverse
+
     random.shuffle(train)
     random.shuffle(test)
 
