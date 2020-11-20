@@ -12,15 +12,14 @@ class ProteinInteraction(nn.Module):
         self.h1_layer = nn.Linear(768, 265)
         self.h2_layer = nn.Linear(265, 2)
 
-    def calculate_accuracy(self, output, target):
-        prediction = torch.argmax(output, dim=1).detach()
+    def calculate_accuracy(self, prediction, target):
         target = torch.argmax(target, dim=1)
 
         accuracy = accuracy_score(prediction, target)
-        return accuracy, prediction
+        return accuracy
 
 
-    def forward(self, protein_pair_tensor, interaction_tensor):
+    def forward(self, protein_pair_tensor, interaction_tensor=None):
 
         x = self.input_layer(protein_pair_tensor)
         x = nn.functional.relu(x)
@@ -28,12 +27,15 @@ class ProteinInteraction(nn.Module):
         x = nn.functional.relu(x)
         x = self.h2_layer(x)
         output = nn.functional.softmax(x, dim=1)
+        prediction = torch.argmax(output, dim=1).detach()
 
-        loss = nn.functional.binary_cross_entropy(output.float(), interaction_tensor.float())
+        if interaction_tensor is not None:
+            loss = nn.functional.binary_cross_entropy(output.float(), interaction_tensor.float())
+            accuracy = self.calculate_accuracy(prediction, interaction_tensor)
+            return output, loss, accuracy, prediction
 
-        accuracy, prediction = self.calculate_accuracy(output, interaction_tensor)
-
-        return output, loss, accuracy, prediction
+        else:
+            return output.detach(), prediction
 
 
 
