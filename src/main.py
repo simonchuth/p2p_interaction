@@ -4,9 +4,8 @@ import random
 
 from os.path import join
 
+import torch
 from torch import optim
-
-from tqdm import tqdm
 
 from src.utils import pickle_load, json_load, chunk_list, str2bool
 from src.preprocess import preprocess_batch
@@ -61,7 +60,7 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
         train_loss = 0
         train_acc = 0
 
-        for batch in tqdm(train_chunk):
+        for batch in train_chunk:
             # Batch preprocessing
             protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=2046, use_cuda=use_cuda)
 
@@ -84,7 +83,7 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
         print(f'Train Loss: {train_loss} ... Train Accuracy: {train_acc}')
 
         test_start_time = time.time()
-        for batch in tqdm(test_chunk):
+        for batch in test_chunk:
             # Batch preprocessing
             protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=2046)
 
