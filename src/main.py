@@ -83,6 +83,9 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
         print(f'Train Loss: {train_loss} ... Train Accuracy: {train_acc}')
 
         test_start_time = time.time()
+        test_loss = 0
+        test_acc = 0
+
         for batch in test_chunk:
             # Batch preprocessing
             protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=2046)
