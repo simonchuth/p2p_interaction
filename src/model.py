@@ -36,7 +36,6 @@ class ProteinInteraction(nn.Module):
 
 
 def evaluate(target, prediction):
-    target = np.argmax(target, axis=1)
 
     accuracy = accuracy_score(target, prediction)
     f1 = f1_score(target, prediction)

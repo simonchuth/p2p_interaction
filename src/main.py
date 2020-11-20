@@ -147,6 +147,7 @@ def main(datapath,
 
         if test_loss < best_loss:
             torch.save(model, 'best_model.pt')
+            best_loss = test_loss
             es_counter = 0
         else:
             print('Loss not decreasing')
