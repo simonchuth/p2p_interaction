@@ -88,7 +88,7 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
 
         for batch in test_chunk:
             # Batch preprocessing
-            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=max_len)
+            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=max_len, use_cuda=use_cuda)
 
             # Train model
             with torch.no_grad():
