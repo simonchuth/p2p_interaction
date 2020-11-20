@@ -7,7 +7,7 @@ from os.path import join
 import torch
 from torch import optim
 
-from src.utils import pickle_load, json_load, chunk_list, str2bool
+from src.utils import pickle_load, json_load, chunk_list, str2bool, pickle_save
 from src.preprocess import preprocess_batch
 from src.model import ProteinInteraction
 
