@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score
 
 
 class ProteinInteraction(nn.Module):
@@ -12,11 +12,15 @@ class ProteinInteraction(nn.Module):
         self.h1_layer = nn.Linear(768, 265)
         self.h2_layer = nn.Linear(265, 2)
 
-    def calculate_accuracy(self, prediction, target):
+    def evaluate(self, prediction, target):
         target = torch.argmax(target, dim=1)
 
-        accuracy = accuracy_score(prediction, target)
-        return accuracy
+        accuracy = accuracy_score(target, prediction)
+        f1 = f1_score(target, prediction)
+        precision = precision_score(target, prediction)
+        recall = recall_score(target, prediction)
+
+        return accuracy, f1, precision, recall
 
 
     def forward(self, protein_pair_tensor, interaction_tensor=None):
@@ -31,8 +35,8 @@ class ProteinInteraction(nn.Module):
 
         if interaction_tensor is not None:
             loss = nn.functional.binary_cross_entropy(output.float(), interaction_tensor.float())
-            accuracy = self.calculate_accuracy(prediction, interaction_tensor)
-            return output, loss, accuracy, prediction
+            accuracy, f1, precision, recall = self.evaluate(prediction, interaction_tensor)
+            return output, loss, accuracy, f1, precision, recall, prediction
 
         else:
             return output.detach(), prediction

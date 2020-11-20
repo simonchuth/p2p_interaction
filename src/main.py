@@ -60,8 +60,14 @@ def main(datapath,
 
     train_loss_list = []
     train_acc_list = []
+    train_f1_list = []
+    train_precision_list = []
+    train_recall_list = []
     test_loss_list = []
     test_acc_list = []
+    test_f1_list = []
+    test_precision_list = []
+    test_recall_list = []
 
     best_loss = 1000
     es_counter = 0
@@ -71,6 +77,9 @@ def main(datapath,
         train_start_time = time.time()
         train_loss = 0
         train_acc = 0
+        train_f1 = 0
+        train_precision = 0
+        train_recall = 0
 
         for batch in train_chunk:
             # Batch preprocessing
@@ -78,21 +87,32 @@ def main(datapath,
 
             # Train model
             optimizer.zero_grad()
-            output, loss, accuracy, prediction = model(protein_pair_tensor, interaction_tensor)
+            output, loss, accuracy, f1, precision, recall, prediction = model(protein_pair_tensor, interaction_tensor)
             loss.backward()
             optimizer.step()
 
             train_loss += loss.detach().numpy().item()
             train_acc += accuracy.item()
+            train_f1 += f1.item()
+            train_precision += precision.item()
+            train_recall += recall.item()
 
         train_loss = train_loss/train_num_batch
         train_acc = train_acc/train_num_batch
+        train_f1 = train_f1/train_num_batch
+        train_precision = train_precision/train_num_batch
+        train_recall = train_recall/train_num_batch
 
         train_loss_list.append(train_loss)
         train_acc_list.append(train_acc)
+        train_f1_list.append(train_f1)
+        train_precision_list.append(train_precision)
+        train_recall_list.append(train_recall)
 
         print(f'Epoch {epoch + 1} - Training: {int(time.time() - train_start_time)} sec')
         print(f'Train Loss: {train_loss} ... Train Accuracy: {train_acc}')
+        print(f'Train F1: {train_f1} ... Train Precision: {train_precision}')
+        print(f'Train Recall: {train_recall}')
 
         test_start_time = time.time()
         test_loss = 0
@@ -104,19 +124,30 @@ def main(datapath,
 
             # Train model
             with torch.no_grad():
-                output, loss, accuracy, prediction = model(protein_pair_tensor, interaction_tensor)
+                output, loss, accuracy, f1, precision, recall, prediction = model(protein_pair_tensor, interaction_tensor)
 
             test_loss += loss.detach().numpy().item()
             test_acc += accuracy.item()
+            test_f1 += f1.item()
+            test_precision += precision.item()
+            test_recall += recall.item()
 
         test_loss = test_loss/test_num_batch
         test_acc = test_acc/test_num_batch
+        test_f1 = test_f1/test_num_batch
+        test_precision = test_precision/test_num_batch
+        test_recall = test_recall/test_num_batch
 
         test_loss_list.append(test_loss)
         test_acc_list.append(test_acc)
+        test_f1_list.append(test_f1)
+        test_precision_list.append(test_precision)
+        test_recall_list.append(test_recall)
 
         print(f'Epoch {epoch + 1} - Testing: {int(time.time() - test_start_time)} sec')
         print(f'Test Loss: {test_loss} ... Test Accuracy: {test_acc}')
+        print(f'Test F1: {test_f1} ... Test Precision: {test_precision}')
+        print(f'Test Recall: {test_recall}')
 
         if test_loss < best_loss:
             torch.save(model, 'best_model.pt')
@@ -127,8 +158,14 @@ def main(datapath,
 
         pickle_save(train_loss_list, 'train_loss.pkl')
         pickle_save(train_acc_list, 'train_acc.pkl')
+        pickle_save(train_f1_list, 'train_f1.pkl')
+        pickle_save(train_precision_list, 'train_precision.pkl')
+        pickle_save(train_recall_list, 'train_recall.pkl')
         pickle_save(test_loss_list, 'test_loss.pkl')
         pickle_save(test_acc_list, 'test_acc.pkl')
+        pickle_save(test_f1_list, 'test_f1.pkl')
+        pickle_save(test_precision_list, 'test_precision.pkl')
+        pickle_save(test_recall_list, 'test_recall.pkl')
 
         if es_counter > es_patience:
             break
