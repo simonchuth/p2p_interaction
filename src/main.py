@@ -117,6 +117,9 @@ def main(datapath,
         test_start_time = time.time()
         test_loss = 0
         test_acc = 0
+        test_f1 = 0
+        test_precision = 0
+        test_recall = 0
 
         for batch in test_chunk:
             # Batch preprocessing
