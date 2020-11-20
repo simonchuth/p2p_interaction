@@ -11,7 +11,8 @@ from src.utils import pickle_load, json_load, chunk_list, str2bool, pickle_save
 from src.preprocess import preprocess_batch
 from src.model import ProteinInteraction, evaluate
 
-def main(datapath,
+def main(data_path,
+         output_path=None,
          random_seed=1,
          test_fraction=0.1,
          batch_size=100,
@@ -21,9 +22,9 @@ def main(datapath,
          use_cuda=False,
          es_patience=3):
 
-    dataset_nip = pickle_load(join(datapath, 'dataset_nip.pkl'))
-    dataset_ip = pickle_load(join(datapath, 'dataset_ip.pkl'))
-    seq_dict = json_load(join(datapath, 'seq_dict.json'))
+    dataset_nip = pickle_load(join(data_path, 'dataset_nip.pkl'))
+    dataset_ip = pickle_load(join(data_path, 'dataset_ip.pkl'))
+    seq_dict = json_load(join(data_path, 'seq_dict.json'))
 
     random.shuffle(dataset_nip)
     random.shuffle(dataset_ip)
@@ -71,6 +72,34 @@ def main(datapath,
 
     best_loss = 1000
     es_counter = 0
+
+    best_model_path = 'best_model.pt'
+    final_model_path = 'final_model.pt'
+    train_loss_path = 'train_loss.pkl'
+    train_acc_path = 'train_acc.pkl'
+    train_f1_path = 'train_f1.pkl'
+    train_precision_path = 'train_precision.pkl'
+    train_recall_path = 'train_recall.pkl'
+    test_loss_path = 'test_loss.pkl'
+    test_acc_path = 'test_acc.pkl'
+    test_f1_path = 'test_f1.pkl'
+    test_precision_path = 'test_precision.pkl'
+    test_recall_path = 'test_recall.pkl'
+
+    if output_path is not None:
+        best_model_path = join(output_path, best_model_path)
+        final_model_path = join(output_path, final_model_path)
+        train_loss_path = join(output_path, train_loss_path)
+        train_acc_path = join(output_path, train_acc_path)
+        train_f1_path = join(output_path, train_f1_path)
+        train_precision_path = join(output_path, train_precision_path)
+        train_recall_path = join(output_path, train_recall_path)
+        test_loss_path = join(output_path, test_loss_path)
+        test_acc_path = join(output_path, test_acc_path)
+        test_f1_path = join(output_path, test_f1_path)
+        test_precision_path = join(output_path, test_precision_path)
+        test_recall_path = join(output_path, test_recall_path)
+
 
     for epoch in range(num_epoch):
         print(f'Epoch {epoch + 1}')
@@ -146,28 +175,28 @@ def main(datapath,
         print(f'Test Recall: {recall}')
 
         if test_loss < best_loss:
-            torch.save(model, 'best_model.pt')
+            torch.save(model, best_model_path)
             best_loss = test_loss
             es_counter = 0
         else:
             print('Loss not decreasing')
             es_counter += 1
 
-        pickle_save(train_loss_list, 'train_loss.pkl')
-        pickle_save(train_acc_list, 'train_acc.pkl')
-        pickle_save(train_f1_list, 'train_f1.pkl')
-        pickle_save(train_precision_list, 'train_precision.pkl')
-        pickle_save(train_recall_list, 'train_recall.pkl')
-        pickle_save(test_loss_list, 'test_loss.pkl')
-        pickle_save(test_acc_list, 'test_acc.pkl')
-        pickle_save(test_f1_list, 'test_f1.pkl')
-        pickle_save(test_precision_list, 'test_precision.pkl')
-        pickle_save(test_recall_list, 'test_recall.pkl')
+        pickle_save(train_loss_list, train_loss_path)
+        pickle_save(train_acc_list, train_acc_path)
+        pickle_save(train_f1_list, train_f1_path)
+        pickle_save(train_precision_list, train_precision_path)
+        pickle_save(train_recall_list, train_recall_path)
+        pickle_save(test_loss_list, test_loss_path)
+        pickle_save(test_acc_list, test_acc_path)
+        pickle_save(test_f1_list, test_f1_path)
+        pickle_save(test_precision_list, test_precision_path)
+        pickle_save(test_recall_list, test_recall_path)
 
         if es_counter > es_patience:
             break
 
-    torch.save(model, 'final_model.pt')
+    torch.save(model, final_model_path)
 
 
 
