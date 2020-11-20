@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+import numpy as np
+
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 
@@ -34,7 +36,7 @@ class ProteinInteraction(nn.Module):
 
 
 def evaluate(target, prediction):
-    target = torch.argmax(target, dim=1)
+    target = np.argmax(target, dim=1)
 
     accuracy = accuracy_score(target, prediction)
     f1 = f1_score(target, prediction)
