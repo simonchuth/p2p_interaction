@@ -9,7 +9,7 @@ from torch import optim
 
 from src.utils import pickle_load, json_load, chunk_list, str2bool, pickle_save
 from src.preprocess import preprocess_batch
-from src.model import ProteinInteraction
+from src.model import ProteinInteraction, evaluate
 
 def main(datapath,
          random_seed=1,
@@ -76,10 +76,8 @@ def main(datapath,
         print(f'Epoch {epoch + 1}')
         train_start_time = time.time()
         train_loss = 0
-        train_acc = 0
-        train_f1 = 0
-        train_precision = 0
-        train_recall = 0
+        train_prediction = []
+        train_target = []
 
         for batch in train_chunk:
             # Batch preprocessing
@@ -87,39 +85,36 @@ def main(datapath,
 
             # Train model
             optimizer.zero_grad()
-            output, loss, accuracy, f1, precision, recall, prediction = model(protein_pair_tensor, interaction_tensor)
+            output, loss, prediction, target = model(protein_pair_tensor, interaction_tensor)
+            train_prediction.append(prediction)
+            train_target.append(target)
+
             loss.backward()
             optimizer.step()
 
             train_loss += loss.detach().numpy().item()
-            train_acc += accuracy.item()
-            train_f1 += f1.item()
-            train_precision += precision.item()
-            train_recall += recall.item()
 
         train_loss = train_loss/train_num_batch
-        train_acc = train_acc/train_num_batch
-        train_f1 = train_f1/train_num_batch
-        train_precision = train_precision/train_num_batch
-        train_recall = train_recall/train_num_batch
+
+        prediction = torch.cat(train_prediction, 0).numpy()
+        target = torch.cat(train_target, 0).numpy()
+        accuracy, f1, precision, recall = evaluate(target, prediction)
 
         train_loss_list.append(train_loss)
-        train_acc_list.append(train_acc)
-        train_f1_list.append(train_f1)
-        train_precision_list.append(train_precision)
-        train_recall_list.append(train_recall)
+        train_acc_list.append(accuracy)
+        train_f1_list.append(f1)
+        train_precision_list.append(precision)
+        train_recall_list.append(recall)
 
         print(f'Epoch {epoch + 1} - Training: {int(time.time() - train_start_time)} sec')
-        print(f'Train Loss: {train_loss} ... Train Accuracy: {train_acc}')
-        print(f'Train F1: {train_f1} ... Train Precision: {train_precision}')
-        print(f'Train Recall: {train_recall}')
+        print(f'Train Loss: {train_loss} ... Train Accuracy: {accuracy}')
+        print(f'Train F1: {f1} ... Train Precision: {precision}')
+        print(f'Train Recall: {recall}')
 
         test_start_time = time.time()
         test_loss = 0
-        test_acc = 0
-        test_f1 = 0
-        test_precision = 0
-        test_recall = 0
+        test_prediction = []
+        test_target = []
 
         for batch in test_chunk:
             # Batch preprocessing
@@ -127,30 +122,28 @@ def main(datapath,
 
             # Train model
             with torch.no_grad():
-                output, loss, accuracy, f1, precision, recall, prediction = model(protein_pair_tensor, interaction_tensor)
+                output, loss, prediction, target = model(protein_pair_tensor, interaction_tensor)
+            test_prediction.append(prediction)
+            test_target.append(target)
 
             test_loss += loss.detach().numpy().item()
-            test_acc += accuracy.item()
-            test_f1 += f1.item()
-            test_precision += precision.item()
-            test_recall += recall.item()
 
         test_loss = test_loss/test_num_batch
-        test_acc = test_acc/test_num_batch
-        test_f1 = test_f1/test_num_batch
-        test_precision = test_precision/test_num_batch
-        test_recall = test_recall/test_num_batch
+
+        prediction = torch.cat(test_prediction, 0).numpy()
+        target = torch.cat(test_target, 0).numpy()
+        accuracy, f1, precision, recall = evaluate(target, prediction)
 
         test_loss_list.append(test_loss)
-        test_acc_list.append(test_acc)
-        test_f1_list.append(test_f1)
-        test_precision_list.append(test_precision)
-        test_recall_list.append(test_recall)
+        test_acc_list.append(accuracy)
+        test_f1_list.append(f1)
+        test_precision_list.append(precision)
+        test_recall_list.append(recall)
 
         print(f'Epoch {epoch + 1} - Testing: {int(time.time() - test_start_time)} sec')
-        print(f'Test Loss: {test_loss} ... Test Accuracy: {test_acc}')
-        print(f'Test F1: {test_f1} ... Test Precision: {test_precision}')
-        print(f'Test Recall: {test_recall}')
+        print(f'Test Loss: {test_loss} ... Test Accuracy: {accuracy}')
+        print(f'Test F1: {f1} ... Test Precision: {precision}')
+        print(f'Test Recall: {recall}')
 
         if test_loss < best_loss:
             torch.save(model, 'best_model.pt')
