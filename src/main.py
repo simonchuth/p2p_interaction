@@ -62,7 +62,7 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
 
         for batch in train_chunk:
             # Batch preprocessing
-            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=2046, use_cuda=use_cuda)
+            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=max_len, use_cuda=use_cuda)
 
             # Train model
             optimizer.zero_grad()
@@ -88,7 +88,7 @@ def main(datapath, random_seed=1, test_fraction=0.1, batch_size=100, max_len=204
 
         for batch in test_chunk:
             # Batch preprocessing
-            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=2046)
+            protein_pair_tensor, interaction_tensor = preprocess_batch(batch, seq_dict, max_len=max_len)
 
             # Train model
             with torch.no_grad():
